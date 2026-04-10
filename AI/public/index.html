@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UXFlow AI | Local Intelligent UX Strategy</title>
+    <meta name="description"
+        content="UXFlow AI uses local heuristics to turn chaotic client requirements into structured UX design outputs, flows, and copy instantly.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0b0f1a;
+            --card-bg: #161c2d;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #2d3748;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --glass: rgba(255, 255, 255, 0.03);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Background Glows */
+        .glow {
+            position: fixed;
+            width: 40vw;
+            height: 40vw;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+            border-radius: 50%;
+            z-index: -1;
+            filter: blur(80px);
+        }
+
+        .glow-1 {
+            top: -10%;
+            left: -10%;
+        }
+
+        .glow-2 {
+            bottom: -10%;
+            right: -10%;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #6366f1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .tagline {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Input Card */
+        .input-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            margin-bottom: 3rem;
+            transition: var(--transition);
+        }
+
+        .input-section:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            color: var(--text-main);
+            font-size: 1rem;
+            resize: vertical;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        textarea:focus {
+            border-color: var(--primary);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        select {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            color: var(--text-main);
+            outline: none;
+            cursor: pointer;
+        }
+
+        button#generate-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button#generate-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+        }
+
+        button#generate-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--glass);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Results Dashboard */
+        .dashboard {
+            display: none;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 2rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-indigo {
+            background: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .badge-emerald {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        /* Specific Layouts */
+        .col-12 {
+            grid-column: span 12;
+        }
+
+        .col-8 {
+            grid-column: span 8;
+        }
+
+        .col-4 {
+            grid-column: span 4;
+        }
+
+        .col-6 {
+            grid-column: span 6;
+        }
+
+        @media (max-width: 992px) {
+
+            .col-8,
+            .col-4,
+            .col-6 {
+                grid-column: span 12;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .summary-text {
+            font-size: 1.1rem;
+            color: #e2e8f0;
+        }
+
+        ul.list-items {
+            list-style: none;
+        }
+
+        ul.list-items li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--glass);
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        ul.list-items li:last-child {
+            border: none;
+        }
+
+        .icon-check {
+            color: var(--accent-emerald);
+            flex-shrink: 0;
+        }
+
+        .step-num {
+            background: var(--primary);
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .score-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary) 0%, #1e1b4b 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .score-val {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .score-label {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        .metric-row {
+            width: 100%;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.4rem;
+        }
+
+        .progress-bg {
+            width: 100%;
+            height: 6px;
+            background: var(--glass);
+            border-radius: 100px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 100px;
+            transition: width 1s ease-out;
+        }
+
+        .copy-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .copy-header {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .copy-val {
+            font-weight: 500;
+        }
+
+        /* Animations */
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Toast notifications */
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            background: var(--accent-rose);
+            color: white;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        .placeholder-hint {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 1rem;
+            display: block;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1>UXFlow AI</h1>
+                <p class="tagline">Local Intelligence. Zero API Hooks. Pure Logic.</p>
+            </div>
+        </header>
+
+        <main class="input-section">
+            <div class="input-group">
+                <label for="brief">Describe the Chaos</label>
+                <textarea id="brief"
+                    placeholder="Paste your messy client brief here... (e.g., 'Need a fitness app with social sharing and a progress tracker...')"></textarea>
+                <small class="placeholder-hint">✨ Tip: Don’t clean your brief. The local engine handles the
+                    noise.</small>
+            </div>
+
+            <div class="controls">
+                <div class="input-group">
+                    <label>Project Phase</label>
+                    <select id="project-type">
+                        <option value="Mobile App">Mobile App</option>
+                        <option value="Web Platform">Web Platform</option>
+                        <option value="Landing Page">Landing Page</option>
+                        <option value="Dashboard">Admin Dashboard</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Brand Tone</label>
+                    <select id="brand-tone">
+                        <option value="Modern & Minimal">Modern & Minimal</option>
+                        <option value="Playful & Bold">Playful & Bold</option>
+                        <option value="Corporate & Trustworthy">Corporate & Trustworthy</option>
+                        <option value="Futuristic & High-Tech">Futuristic & High-Tech</option>
+                    </select>
+                </div>
+                <button id="generate-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path
+                            d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z">
+                        </path>
+                        <path d="M5 3v4"></path>
+                        <path d="M19 17v4"></path>
+                        <path d="M3 5h4"></path>
+                        <path d="M17 19h4"></path>
+                    </svg>
+                    Analyze Brief
+                </button>
+            </div>
+        </main>
+
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p id="loading-text">Running local heuristics...</p>
+        </div>
+
+        <section class="dashboard" id="dashboard">
+            <!-- Product Summary -->
+            <div class="card col-8">
+                <div class="card-header">
+                    <div class="card-title">✨ Product Essence</div>
+                    <span class="badge badge-indigo" id="out-type">App</span>
+                </div>
+                <p id="out-summary" class="summary-text"></p>
+            </div>
+
+            <!-- Quality Score -->
+            <div class="card col-4">
+                <div class="card-header">
+                    <div class="card-title">📊 Brief Score</div>
+                </div>
+                <div class="score-container">
+                    <div class="score-circle">
+                        <span class="score-val" id="out-score">--</span>
+                        <span class="score-label">Clarity</span>
+                    </div>
+                    <div class="metric-row">
+                        <div class="metric-label"><span>Completeness</span><span id="out-metric-comp">0%</span></div>
+                        <div class="progress-bg">
+                            <div class="progress-fill" id="pb-comp" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Features -->
+            <div class="card col-6">
+                <div class="card-header">
+                    <div class="card-title">🚀 Core Features</div>
+                </div>
+                <ul class="list-items" id="out-features"></ul>
+            </div>
+
+            <!-- Screens List -->
+            <div class="card col-6">
+                <div class="card-header">
+                    <div class="card-title">📱 Required Screens</div>
+                </div>
+                <ul class="list-items" id="out-screens"></ul>
+            </div>
+
+            <!-- User Flow -->
+            <div class="card col-12">
+                <div class="card-header">
+                    <div class="card-title">🛤️ Primary User Flow</div>
+                    <span class="badge badge-emerald">Happy Path</span>
+                </div>
+                <ul class="list-items" id="out-flow"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;"></ul>
+            </div>
+
+            <!-- UX Copy -->
+            <div class="card col-8">
+                <div class="card-header">
+                    <div class="card-title">✍️ Microcopy Guide</div>
+                </div>
+                <div id="out-copy" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;"></div>
+            </div>
+
+            <!-- Improvements -->
+            <div class="card col-4">
+                <div class="card-header">
+                    <div class="card-title">💡 Strategist Notes</div>
+                </div>
+                <ul class="list-items" id="out-improvements"></ul>
+            </div>
+        </section>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+        const generateBtn = document.getElementById('generate-btn');
+        const loader = document.getElementById('loader');
+        const loadingText = document.getElementById('loading-text');
+        const dashboard = document.getElementById('dashboard');
+        const toast = document.getElementById('toast');
+
+        // Local Heuristic Library
+        const featureLibrary = {
+            'login': { title: "Auth System", description: "Secure user entry via credentials or OAuth." },
+            'user': { title: "Profile Management", description: "Personalized user settings and history." },
+            'pay': { title: "Payment Gateway", description: "Integrated transactional flow via Stripe or PayPal." },
+            'search': { title: "Smart Search", description: "Fuzzy search with filters and instant results." },
+            'social': { title: "Social Graph", description: "Connect with peers and share activity." },
+            'chat': { title: "Real-time Messaging", description: "Low-latency communication interface." },
+            'map': { title: "Geolocation Services", description: "Interactive map visualization and tracking." },
+            'order': { title: "Ordering Logic", description: "End-to-end shopping cart and checkout flow." },
+            'fitness': { title: "Activity Tracking", description: "Sensor integration for biometric monitoring." },
+            'health': { title: "Vitals Dashboard", description: "Data visualization for health metrics." },
+            'ai': { title: "ML Integration", description: "Predictive analysis based on user behavior." },
+            'secure': { title: "Data Encryption", description: "End-to-end security for sensitive information." }
+        };
+
+        const screenLibrary = {
+            'login': "Auth / Sign In",
+            'onboard': "Onboarding Flow",
+            'dash': "Main Dashboard",
+            'set': "Settings & Privacy",
+            'feed': "Activity Stream",
+            'check': "Secure Checkout",
+            'detail': "Product/Item Detail"
+        };
+
+        const copyLibrary = {
+            'Modern & Minimal': { btn: "Get Started", sub: "Elegance in every interaction." },
+            'Playful & Bold': { btn: "Let's Go!", sub: "Fast, fun, and totally awesome." },
+            'Corporate & Trustworthy': { btn: "Register Now", sub: "Secure infrastructure for your business." },
+            'Futuristic & High-Tech': { btn: "Initialize", sub: "Next-gen logic at your fingertips." }
+        };
+
+        generateBtn.addEventListener('click', async () => {
+            const brief = document.getElementById('brief').value;
+            const type = document.getElementById('project-type').value;
+            const tone = document.getElementById('brand-tone').value;
+
+            if (!brief || brief.length < 5) {
+                showToast("Please provide a bit more detail in your brief.");
+                return;
+            }
+
+            // UI Interaction
+            generateBtn.disabled = true;
+            loader.style.display = 'block';
+            dashboard.style.display = 'none';
+
+            const stages = ["Parsing syntax...", "Keyword extraction...", "Generating logic...", "Finalizing UI/UX plan..."];
+            for (let stage of stages) {
+                loadingText.innerText = stage;
+                await new Promise(r => setTimeout(r, 400));
+            }
+
+            // Local Generation Logic
+            const result = generateLogic(brief, type, tone);
+
+            renderDashboard(result, type);
+            loader.style.display = 'none';
+            generateBtn.disabled = false;
+        });
+
+        function generateLogic(brief, type, tone) {
+            const lowerBrief = brief.toLowerCase();
+            const keywords = Object.keys(featureLibrary).filter(k => lowerBrief.includes(k));
+
+            // 1. Build Features
+            let features = keywords.map(k => featureLibrary[k]);
+            if (features.length < 3) {
+                features.push({ title: "Custom Logic", description: "Tailored algorithms for " + type + " needs." });
+                features.push({ title: "Responsive Layout", description: "Fluid grid designed for all device scales." });
+                features.push({ title: "Accessibility Layer", description: "WCAG compliant interface for inclusivity." });
+            }
+            features = features.slice(0, 4);
+
+            // 2. Build Flow
+            const flow = ["App Launch", "Welcome Sequence"];
+            if (keywords.includes('login')) flow.push("Secure Auth");
+            flow.push("Main Interface", "Core Action", "Confirmation", "Success State");
+
+            // 3. Screens
+            const screens = [
+                { name: "Welcome Screen", components: ["Hero Image", "CTA Button"] },
+                { name: "Global Dashboard", components: ["Sidebar", "Notification Center"] }
+            ];
+            if (keywords.includes('pay')) screens.push({ name: "Checkout Portal", components: ["Card Form", "Price Breakdown"] });
+            if (keywords.includes('search')) screens.push({ name: "Discovery View", components: ["Search Bar", "Filter Chips"] });
+            screens.push({ name: "User Settings", components: ["Toggle Switches", "Profile Avatar"] });
+
+            // 4. UX Copy
+            const toneData = copyLibrary[tone] || copyLibrary['Modern & Minimal'];
+            const uxCopy = [
+                { element: "Primary Button", copy: toneData.btn },
+                { element: "Landing Tagline", copy: toneData.sub },
+                { element: "Success Msg", copy: tone === 'Playful & Bold' ? "You nailed it!" : "Action completed successfully." }
+            ];
+
+            // 5. Scoring
+            const clarity = Math.min(100, brief.length / 2 + 30);
+            const completeness = Math.min(100, keywords.length * 20 + 20);
+            const score = Math.round((clarity + completeness) / 2);
+
+            return {
+                summary: `A high-performance ${type} designed with a ${tone} philosophy, focusing on ${keywords.join(', ') || 'streamlined interaction'}.`,
+                features,
+                userFlow: flow,
+                screens,
+                uxCopy,
+                improvements: [
+                    "Perform user testing on the core loop",
+                    "Add dark mode toggle for low-light accessibility",
+                    "Integrate micro-interactions on button states"
+                ],
+                qualityScore: { score, metrics: { clarity, completeness } }
+            };
+        }
+
+        function renderDashboard(data, type) {
+            dashboard.style.display = 'grid';
+
+            document.getElementById('out-type').innerText = type;
+            document.getElementById('out-summary').innerText = data.summary;
+            document.getElementById('out-score').innerText = data.qualityScore.score;
+            document.getElementById('out-metric-comp').innerText = Math.round(data.qualityScore.metrics.completeness) + '%';
+            document.getElementById('pb-comp').style.width = data.qualityScore.metrics.completeness + '%';
+
+            renderList('out-features', data.features, item => `<div><strong>${item.title}:</strong> ${item.description}</div>`);
+            renderList('out-screens', data.screens, item => `<div><strong>${item.name}</strong><br><small style="color:var(--text-muted)">${item.components.join(', ')}</small></div>`);
+            renderList('out-flow', data.userFlow, (item, i) => `<div class="step-num">${i + 1}</div> <span>${item}</span>`);
+            renderList('out-improvements', data.improvements, item => `<span class="icon-check">⚡</span> <span>${item}</span>`);
+
+            const copyContainer = document.getElementById('out-copy');
+            copyContainer.innerHTML = data.uxCopy.map(c => `
+                <div class="copy-card">
+                    <div class="copy-header">${c.element}</div>
+                    <div class="copy-val">"${c.copy}"</div>
+                </div>
+            `).join('');
+
+            dashboard.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderList(id, array, formatter) {
+            const el = document.getElementById(id);
+            el.innerHTML = array.map((item, i) => `<li>${formatter(item, i)}</li>`).join('');
+        }
+
+        function showToast(msg) {
+            toast.style.display = 'block';
+            toast.innerText = msg;
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+    </script>
+</body>
+
+</html>
